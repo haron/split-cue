@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# vcid3 - convert vorbis comments to id3 tags
+#
+# source file http://hints.macworld.com/article.php?story=20040323004759816
+# changed to comply new metaflac options (--show-tag instead of --show-vc-field)
+# and id3 tad utility instead of id3tool
+#
+
+if [ -e "$1" ]
+then
+  if [ -e "$2" ]
+  then
+    TITLE="$(metaflac --show-tag=TITLE "$1" |
+      sed 's/TITLE=\(.*\)/\1/')"
+    ARTIST="$(metaflac --show-tag=ARTIST "$1" |
+      sed 's/ARTIST=\(.*\)/\1/')"
+    ALBUM="$(metaflac --show-tag=ALBUM "$1" |
+      sed 's/ALBUM=\(.*\)/\1/')"
+    TRACK="$(metaflac --show-tag=TRACKNUMBER "$1" |
+      sed 's/TRACKNUMBER=\(.*\)/\1/')"
+    YEAR="$(metaflac --show-tag=DATE "$1" |
+      sed 's/DATE=\(.*\)/\1/')"
+    GENRE="$(metaflac --show-tag=GENRE "$1" |
+      sed 's/GENRE=\(.*\)/\1/')"
+    if [ "$GENRE" ]
+    then
+      id3tag --genre="$GENRE" "$2"
+    fi
+    id3tag \
+      --song="$TITLE" \
+      --artist="$ARTIST" \
+      --album="$ALBUM" \
+      --track="$TRACK" \
+      --year="$YEAR" \
+      "$2"
+  else
+    echo >&2 "No such file: "$2""
+    echo >&2 "Usage: "$(basename "$0")" FLACFILE MP3FILE"
+    exit 1
+  fi
+else
+  echo >&2 "No such file: "$1""
+  echo >&2 "Usage: "$(basename "$0")" FLACFILE MP3FILE"
+  exit 1
+fi
