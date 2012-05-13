@@ -1,7 +1,9 @@
 #!/bin/sh
 
-for F in *.flac; do
-    MP3="$(basename "$F" .flac).mp3"
+DIR="${PARAM:-.}"
+
+for F in $DIR/*.flac; do
+    MP3="$DIR/$(basename "$F" .flac).mp3"
     flac -s -c -d "$F" | lame --silent --preset standard - "$MP3"
-    `basename $0`/vcid3 "$F" "$MP3"
+    `dirname $0`/vcid3 "$F" "$MP3"
 done
